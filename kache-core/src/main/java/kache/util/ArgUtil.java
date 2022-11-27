@@ -5,12 +5,6 @@ package kache.util;
  * heaven All rights reserved.
  */
 
-/**
- * 参数工具类
- *
- * @author bbhou
- * @since 0.0.1
- */
 public final class ArgUtil {
 
     private ArgUtil() {
