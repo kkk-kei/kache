@@ -40,11 +40,11 @@ public final class ArgUtil {
      * @param string 待检查的字符串
      * @param name 字符串的名称
      */
-//    public static void notEmpty(String string, String name) {
-//        if(StringUtil.isEmpty(string)) {
-//            throw new IllegalArgumentException(name + " can not be null!");
-//        }
-//    }
+    public static void notEmpty(String string, String name) {
+        if(StringUtil.isEmpty(string)) {
+            throw new IllegalArgumentException(name + " can not be null!");
+        }
+    }
 
     /**
      * 断言: real 与 except 相等

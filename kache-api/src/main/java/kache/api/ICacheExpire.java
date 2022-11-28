@@ -17,4 +17,6 @@ public interface ICacheExpire<K,V> {
      * @since 0.0.3
      */
     void refreshExpire(final Collection<K> keyList);
+
+    Long expireTime(final K key);
 }
