@@ -25,6 +25,6 @@ public final class CachePersists {
      * @since 0.0.8
      */
     public static <K,V> ICachePersist<K,V> dbJson(final String path) {
-        return new CachePersistDbJson<>(path);
+        return new CachePersistRDB<>(path);
     }
 }

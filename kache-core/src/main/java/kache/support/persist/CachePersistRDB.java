@@ -2,18 +2,18 @@ package kache.support.persist;
 
 import com.alibaba.fastjson.JSON;
 import kache.api.ICache;
-import kache.api.ICachePersist;
-import kache.model.PersistEntry;
+import kache.model.PersistRDBEntry;
 import kache.util.FileUtil;
 
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-public class CachePersistDbJson<K,V> implements ICachePersist<K,V> {
+public class CachePersistRDB<K,V> extends CachePersistAdaptor<K,V> {
     private final String dbPath;
 
-    public CachePersistDbJson(String dbPath) {
+    public CachePersistRDB(String dbPath) {
         this.dbPath = dbPath;
     }
 
@@ -29,13 +29,28 @@ public class CachePersistDbJson<K,V> implements ICachePersist<K,V> {
         for(Map.Entry<K,V> entry : entrySet) {
             K key = entry.getKey();
             Long expireTime = cache.expire().expireTime(key);
-            PersistEntry<K,V> persistEntry = new PersistEntry<>();
-            persistEntry.setKey(key);
-            persistEntry.setValue(entry.getValue());
-            persistEntry.setExpire(expireTime);
+            PersistRDBEntry<K,V> persistRDBEntry = new PersistRDBEntry<>();
+            persistRDBEntry.setKey(key);
+            persistRDBEntry.setValue(entry.getValue());
+            persistRDBEntry.setExpire(expireTime);
 
-            String line = JSON.toJSONString(persistEntry);
+            String line = JSON.toJSONString(persistRDBEntry);
             FileUtil.write(dbPath, line, StandardOpenOption.APPEND);
         }
+    }
+
+    @Override
+    public long delay() {
+        return this.period();
+    }
+
+    @Override
+    public long period() {
+        return 10;
+    }
+
+    @Override
+    public TimeUnit timeUnit() {
+        return TimeUnit.MINUTES;
     }
 }

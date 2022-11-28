@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.file.*;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -1228,26 +1229,26 @@ public final class FileUtil {
     public static void truncate(final String filePath) {
         FileUtil.write(filePath, StringUtil.EMPTY, StandardOpenOption.TRUNCATE_EXISTING);
     }
-//
-//    /**
-//     * 追加文件内容
-//     * @param filePath 文件路径
-//     * @param line 文件内容
-//     * @since 0.1.117
-//     */
-//    public static void append(final String filePath, final String line) {
-//        FileUtil.write(filePath, line, StandardOpenOption.APPEND);
-//    }
-//
-//    /**
-//     * 追加文件内容
-//     * @param filePath 文件路径
-//     * @param collection 文件内容
-//     * @since 0.1.117
-//     */
-//    public static void append(final String filePath, final Collection<String> collection) {
-//        FileUtil.write(filePath, collection, StandardOpenOption.APPEND);
-//    }
+
+    /**
+     * 追加文件内容
+     * @param filePath 文件路径
+     * @param line 文件内容
+     * @since 0.1.117
+     */
+    public static void append(final String filePath, final String line) {
+        FileUtil.write(filePath, line, StandardOpenOption.APPEND);
+    }
+
+    /**
+     * 追加文件内容
+     * @param filePath 文件路径
+     * @param collection 文件内容
+     * @since 0.1.117
+     */
+    public static void append(final String filePath, final Collection<String> collection) {
+        FileUtil.write(filePath, collection, StandardOpenOption.APPEND);
+    }
 //
 //    /**
 //     * 将文件转成 base64 字符串

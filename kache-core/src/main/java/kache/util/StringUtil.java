@@ -323,9 +323,9 @@ public final class StringUtil {
 //     * @param string 字符串
 //     * @return {@code true} 为非空
 //     */
-//    public static boolean isNotEmpty(final String string) {
-//        return !isEmpty(string);
-//    }
+    public static boolean isNotEmpty(final String string) {
+        return !isEmpty(string);
+    }
 //
 //    /**
 //     * 是否为空

@@ -12,6 +12,6 @@ public final class CacheLoads {
     }
 
     public static <K,V> ICacheLoad<K,V> dbJson(final String dbPath) {
-        return new CacheLoadDbJson<>(dbPath);
+        return new CacheLoadRDB<>(dbPath);
     }
 }

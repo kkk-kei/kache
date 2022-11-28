@@ -5,7 +5,7 @@ import kache.api.ICacheEvict;
 import kache.api.ICacheLoad;
 import kache.api.ICachePersist;
 import kache.core.Cache;
-import kache.core.CacheContext;
+import kache.support.proxy.CacheProxy;
 import kache.support.evict.CacheEvicts;
 import kache.support.load.CacheLoads;
 import kache.support.persist.CachePersists;
@@ -57,12 +57,14 @@ public final class CacheBs<K,V> {
     }
 
     public ICache<K,V> build() {
-        CacheContext<K,V> context = new CacheContext<>();
-        context.map(map);
-        context.size(size);
-        context.cacheEvict(evict);
-        context.cacheLoad(load);
-        context.cachePersist(persist);
-        return new Cache<>(context);
+        Cache<K,V> cache = new Cache<>();
+        cache.map(map);
+        cache.evict(evict);
+        cache.sizeLimit(size);
+        cache.load(load);
+        cache.persist(persist);
+        // 初始化
+        cache.init();
+        return CacheProxy.getProxy(cache);
     }
 }

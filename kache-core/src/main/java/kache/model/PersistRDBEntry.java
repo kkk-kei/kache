@@ -1,6 +1,6 @@
 package kache.model;
 
-public class PersistEntry<K,V> {
+public class PersistRDBEntry<K,V> {
 
     private K key;
     private V value;

@@ -1,7 +1,9 @@
 package kache.core;
 
+import kache.annotation.CacheInterceptor;
 import kache.api.*;
 import kache.exception.CacheRuntimeException;
+import kache.support.proxy.CacheProxy;
 import kache.support.evict.CacheEvictContext;
 import kache.support.expire.CacheExpire;
 import kache.support.persist.InnerCachePersist;
@@ -13,38 +15,66 @@ import java.util.Set;
 
 public class Cache<K,V> implements ICache<K,V> {
 
-    private final Map<K,V> map;
-    private final int sizeLimit;
-    private final ICacheEvict<K,V> cacheEvict;
-    private final ICacheExpire<K,V> cacheExpire;
-    private final ICacheLoad<K,V> cacheLoad;
-    private final ICachePersist<K,V> cachePersist;
+    private Map<K,V> map;
+    private int sizeLimit;
+    private ICacheEvict<K,V> evict;
+    private ICacheExpire<K,V> expire;
+    private ICacheLoad<K,V> load;
+    private ICachePersist<K,V> persist;
 
-    public Cache(ICacheContext<K, V> context) {
-        this.map = context.map();
-        this.sizeLimit = context.size();
-        this.cacheEvict = context.cacheEvict();
-        this.cacheExpire = new CacheExpire<>(this);
-        this.cacheLoad = context.cacheLoad();
-        this.cachePersist = context.cachePersist();
+    public Cache<K, V> map(Map<K, V> map) {
+        this.map = map;
+        return this;
+    }
 
-        this.cacheLoad.load(this);
-        new InnerCachePersist<>(this, cachePersist);
+    public Cache<K, V> sizeLimit(int sizeLimit) {
+        this.sizeLimit = sizeLimit;
+        return this;
+    }
+
+    public Cache<K, V> evict(ICacheEvict<K,V> evict) {
+        this.evict = evict;
+        return this;
+    }
+
+    public Cache<K, V> expire(ICacheExpire<K,V> expire) {
+        this.expire = expire;
+        return this;
+    }
+
+    public Cache<K, V> load(ICacheLoad<K,V> load) {
+        this.load = load;
+        return this;
+    }
+
+    public Cache<K, V> persist(ICachePersist<K,V> persist) {
+        this.persist = persist;
+        return this;
+    }
+
+    public void init() {
+        this.expire = new CacheExpire<>(this);
+        this.load.load(this);
+        // 初始化持久化
+        if(this.persist != null) {
+            new InnerCachePersist<>(this, persist);
+        }
     }
 
     @Override
     public V get(Object key) {
         K genericKey = (K) key;
-        this.cacheExpire.refreshExpire(Collections.singletonList(genericKey));
+        this.expire.refreshExpire(Collections.singletonList(genericKey));
         return map.get(key);
     }
 
     @Override
+    @CacheInterceptor(aof = true)
     public V put(K key, V value) {
         //1.1 尝试驱除
         CacheEvictContext<K,V> context = new CacheEvictContext<>();
         context.key(key).size(sizeLimit).cache(this);
-        cacheEvict.evict(context);
+        evict.evict(context);
         //2. 判断驱除后的信息
         if(isSizeLimit()) {
             throw new CacheRuntimeException("当前队列已满，数据添加失败！");
@@ -68,7 +98,7 @@ public class Cache<K,V> implements ICache<K,V> {
     @Override
     public boolean containsKey(Object key) {
         K genericKey = (K) key;
-        this.cacheExpire.refreshExpire(Collections.singletonList(genericKey));
+        this.expire.refreshExpire(Collections.singletonList(genericKey));
         return map.containsKey(key);
     }
 
@@ -79,16 +109,19 @@ public class Cache<K,V> implements ICache<K,V> {
     }
 
     @Override
+    @CacheInterceptor(aof = true)
     public V remove(Object key) {
         return map.remove(key);
     }
 
     @Override
+    @CacheInterceptor(aof = true)
     public void putAll(Map<? extends K, ? extends V> m) {
         map.putAll(m);
     }
 
     @Override
+    @CacheInterceptor(aof = true)
     public void clear() {
         map.clear();
     }
@@ -119,36 +152,33 @@ public class Cache<K,V> implements ICache<K,V> {
     @Override
     public ICache<K, V> expire(K key, long timeInMills) {
         long expireTime = System.currentTimeMillis()+timeInMills;
-        return this.expireAt(key,expireTime);
+        Cache<K,V> cachePoxy = (Cache<K, V>) CacheProxy.getProxy(this);
+        return cachePoxy.expireAt(key, expireTime);
     }
 
     @Override
+    @CacheInterceptor(aof = true)
     public ICache<K, V> expireAt(K key, long timeInMills) {
-        this.cacheExpire.expire(key,timeInMills);
+        this.expire.expire(key,timeInMills);
         return this;
     }
 
     @Override
     public ICacheLoad<K, V> load() {
-        return cacheLoad;
+        return load;
     }
 
     @Override
     public ICacheExpire<K, V> expire() {
-        return cacheExpire;
+        return expire;
+    }
+
+    @Override
+    public ICachePersist<K, V> persist() {
+        return persist;
     }
 
     private void refreshExpireAllKeys() {
-        this.cacheExpire.refreshExpire(map.keySet());
+        this.expire.refreshExpire(map.keySet());
     }
-
-//    public void init() {
-//        this.cacheLoad.load(this);
-////        this.cacheExpire = new CacheExpire<>(this);
-//
-//        // 初始化持久化
-//        if(this.cachePersist != null) {
-//            new InnerCachePersist<>(this, cachePersist);
-//        }
-//    }
 }

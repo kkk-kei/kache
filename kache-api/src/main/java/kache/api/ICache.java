@@ -7,4 +7,5 @@ public interface ICache<K,V> extends Map<K,V> {
     ICache<K, V> expireAt(final K key, final long timeInMills);
     ICacheLoad<K,V> load();
     ICacheExpire<K,V> expire();
+    ICachePersist<K,V> persist();
 }

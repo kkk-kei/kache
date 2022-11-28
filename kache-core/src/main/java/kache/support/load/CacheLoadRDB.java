@@ -3,7 +3,7 @@ package kache.support.load;
 import com.alibaba.fastjson.JSON;
 import kache.api.ICache;
 import kache.api.ICacheLoad;
-import kache.model.PersistEntry;
+import kache.model.PersistRDBEntry;
 import kache.util.CollectionUtil;
 import kache.util.FileUtil;
 import kache.util.ObjectUtil;
@@ -12,12 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-@Slf4j(topic = "CacheLoadDbJson")
-public class CacheLoadDbJson<K,V> implements ICacheLoad<K,V> {
+@Slf4j(topic = "CacheLoadRDB")
+public class CacheLoadRDB<K,V> implements ICacheLoad<K,V> {
 
     private final String dbPath;
 
-    public CacheLoadDbJson(String dbPath) {
+    public CacheLoadRDB(String dbPath) {
         this.dbPath = dbPath;
     }
 
@@ -37,7 +37,7 @@ public class CacheLoadDbJson<K,V> implements ICacheLoad<K,V> {
 
             // 执行
             // 简单的类型还行，复杂的这种反序列化会失败
-            PersistEntry<K,V> entry = JSON.parseObject(line, PersistEntry.class);
+            PersistRDBEntry<K,V> entry = JSON.parseObject(line, PersistRDBEntry.class);
 
             K key = entry.getKey();
             V value = entry.getValue();

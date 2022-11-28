@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class InnerCachePersist<K,V> {
@@ -53,6 +52,6 @@ public class InnerCachePersist<K,V> {
                     log.error("文件持久化异常", exception);
                 }
             }
-        }, 0, 10, TimeUnit.SECONDS);
+        }, persist.delay(), persist.period(), persist.timeUnit());
     }
 }
