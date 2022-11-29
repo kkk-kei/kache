@@ -5,10 +5,10 @@ import kache.api.ICacheEvict;
 import kache.api.ICacheLoad;
 import kache.api.ICachePersist;
 import kache.core.Cache;
-import kache.support.proxy.CacheProxy;
 import kache.support.evict.CacheEvicts;
 import kache.support.load.CacheLoads;
 import kache.support.persist.CachePersists;
+import kache.support.proxy.CacheProxy;
 import kache.util.ArgUtil;
 
 import java.util.HashMap;

@@ -3,15 +3,15 @@ package kache.core;
 import kache.annotation.CacheInterceptor;
 import kache.api.*;
 import kache.exception.CacheRuntimeException;
-import kache.support.proxy.CacheProxy;
 import kache.support.evict.CacheEvictContext;
 import kache.support.expire.CacheExpire;
 import kache.support.persist.InnerCachePersist;
+import kache.support.proxy.CacheProxy;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 public class Cache<K,V> implements ICache<K,V> {
 
@@ -67,6 +67,56 @@ public class Cache<K,V> implements ICache<K,V> {
         this.expire.refreshExpire(Collections.singletonList(genericKey));
         return map.get(key);
     }
+
+    @Override
+    public V flight(Object key, Function<K, V> fun) {
+        V v = get(key);
+        if(v==null){
+            v = fun.apply((K) key);
+        }
+        return v;
+    }
+
+    class Call<V>{
+        CountDownLatch countDownLatch;
+        V value;
+    }
+    ReentrantLock lock = new ReentrantLock();
+    Map<Object,Call> calls;
+    @Override
+    public V singleFlight(Object key, Function<K,V> fun){
+        V v = get(key);
+        if(v!=null) return v;
+        lock.lock();
+        if(calls==null){
+            calls = new HashMap<>();
+        }
+        Call call = calls.get(key);
+        if(call!=null){
+            lock.unlock();
+            try {
+                call.countDownLatch.await();
+            } catch (InterruptedException e) {
+                throw new CacheRuntimeException(e);
+            }
+            return (V) call.value;
+        }
+        call = new Call();
+        call.countDownLatch = new CountDownLatch(1);
+        calls.put(key,call);
+        lock.unlock();
+
+        V val = fun.apply((K) key);
+        call.value = val;
+        call.countDownLatch.countDown();
+
+        lock.lock();
+        calls.remove(key);
+        lock.unlock();
+
+        return val;
+    }
+
 
     @Override
     @CacheInterceptor(aof = true)
