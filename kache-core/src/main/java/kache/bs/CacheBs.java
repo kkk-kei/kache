@@ -26,7 +26,7 @@ public final class CacheBs<K,V> {
 
     private Map<K,V> map = new HashMap<>();
     private int size = Integer.MAX_VALUE;
-    private ICacheEvict<K,V> evict = CacheEvicts.fifo();
+    private ICacheEvict<K,V> evict = CacheEvicts.lru();
     private ICacheLoad<K,V> load = CacheLoads.none();
     private ICachePersist<K,V> persist = CachePersists.none();
 

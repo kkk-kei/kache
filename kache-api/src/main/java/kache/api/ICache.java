@@ -9,6 +9,7 @@ public interface ICache<K,V> extends Map<K,V> {
     ICacheLoad<K,V> load();
     ICacheExpire<K,V> expire();
     ICachePersist<K,V> persist();
+    ICacheEvict<K,V> evict();
     V flight(Object key, Function<K,V> fun);
     V singleFlight(Object key, Function<K,V> fun);
 }

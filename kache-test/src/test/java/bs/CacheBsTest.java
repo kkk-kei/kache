@@ -1,7 +1,9 @@
 package bs;
 
 import kache.api.ICache;
+import kache.api.ICacheEvict;
 import kache.bs.CacheBs;
+import kache.support.evict.CacheEvicts;
 import kache.support.load.CacheLoadAOF;
 import kache.support.load.CacheLoadRDB;
 import kache.support.persist.CachePersistAOF;
@@ -130,5 +132,39 @@ public class CacheBsTest {
             }).start();
         }
         TimeUnit.MILLISECONDS.sleep(1000);
+    }
+
+    @Test
+    public void lruTest(){
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
+                .size(3)
+                .evict(CacheEvicts.lru())
+                .build();
+        cache.put("1","1");
+        cache.put("2","2");
+        cache.put("3","3");
+        cache.get("1"); //1 3 2
+        cache.get("2"); //2 1 3
+        cache.put("4","4");//4 2 1
+        Assert.assertEquals(3, cache.size());
+        cache.evict();
+        System.out.println(cache.keySet());
+    }
+    @Test
+    public void lru2Test(){
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
+                .size(3)
+                .evict(CacheEvicts.lru2())
+                .build();
+        cache.put("1","1");
+        cache.put("2","2");
+        cache.put("3","3");
+        cache.get("1");
+        cache.get("2"); //(2,1)  (3)
+        cache.put("4","4");
+        cache.put("5","5");//(2,1) (5)
+        Assert.assertEquals(3, cache.size());
+        cache.evict()
+        System.out.println(cache.keySet());
     }
 }

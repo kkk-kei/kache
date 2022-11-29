@@ -24,7 +24,7 @@ public final class CacheBsProxy {
      */
     @SuppressWarnings("all")
     private final ICacheInterceptor persistInterceptors = CacheInterceptors.aof();
-
+    private final ICacheInterceptor evictInterceptors = CacheInterceptors.evict();
     /**
      * 新建对象实例
      * @return 实例
@@ -85,6 +85,14 @@ public final class CacheBsProxy {
                     persistInterceptors.before(interceptorContext);
                 } else {
                     persistInterceptors.after(interceptorContext);
+                }
+            }
+            //4. 驱除策略更新
+            if(cacheInterceptor.evict()) {
+                if(before) {
+                    evictInterceptors.before(interceptorContext);
+                } else {
+                    evictInterceptors.after(interceptorContext);
                 }
             }
         }

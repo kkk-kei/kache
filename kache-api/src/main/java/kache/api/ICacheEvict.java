@@ -1,5 +1,7 @@
 package kache.api;
 
 public interface ICacheEvict<K,V> {
-    void evict(final ICacheEvictContext<K, V> context);
+    ICacheEntry<K,V> evict(final ICacheEvictContext<K, V> context);
+    void updateKey(final K key);
+    void removeKey(final K key);
 }

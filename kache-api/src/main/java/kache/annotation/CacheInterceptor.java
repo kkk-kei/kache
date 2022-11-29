@@ -8,4 +8,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheInterceptor {
     boolean aof() default false;
+    boolean evict() default false;
 }

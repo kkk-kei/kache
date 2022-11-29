@@ -62,6 +62,7 @@ public class Cache<K,V> implements ICache<K,V> {
     }
 
     @Override
+    @CacheInterceptor(evict = true)
     public V get(Object key) {
         K genericKey = (K) key;
         this.expire.refreshExpire(Collections.singletonList(genericKey));
@@ -119,12 +120,12 @@ public class Cache<K,V> implements ICache<K,V> {
 
 
     @Override
-    @CacheInterceptor(aof = true)
+    @CacheInterceptor(aof = true,evict = true)
     public V put(K key, V value) {
         //1.1 尝试驱除
         CacheEvictContext<K,V> context = new CacheEvictContext<>();
         context.key(key).size(sizeLimit).cache(this);
-        evict.evict(context);
+        ICacheEntry<K, V> entry = evict.evict(context);
         //2. 判断驱除后的信息
         if(isSizeLimit()) {
             throw new CacheRuntimeException("当前队列已满，数据添加失败！");
@@ -146,6 +147,7 @@ public class Cache<K,V> implements ICache<K,V> {
     }
 
     @Override
+    @CacheInterceptor(evict = true)
     public boolean containsKey(Object key) {
         K genericKey = (K) key;
         this.expire.refreshExpire(Collections.singletonList(genericKey));
@@ -159,7 +161,7 @@ public class Cache<K,V> implements ICache<K,V> {
     }
 
     @Override
-    @CacheInterceptor(aof = true)
+    @CacheInterceptor(aof = true,evict = true)
     public V remove(Object key) {
         return map.remove(key);
     }
@@ -226,6 +228,11 @@ public class Cache<K,V> implements ICache<K,V> {
     @Override
     public ICachePersist<K, V> persist() {
         return persist;
+    }
+
+    @Override
+    public ICacheEvict<K, V> evict() {
+        return evict;
     }
 
     private void refreshExpireAllKeys() {
