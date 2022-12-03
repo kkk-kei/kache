@@ -4,7 +4,7 @@ import kache.annotation.CacheInterceptor;
 import kache.api.*;
 import kache.exception.CacheRuntimeException;
 import kache.support.evict.CacheEvictContext;
-import kache.support.expire.CacheExpire;
+import kache.support.expire.CacheExpireRamdon;
 import kache.support.persist.InnerCachePersist;
 import kache.support.proxy.CacheProxy;
 
@@ -53,7 +53,7 @@ public class Cache<K,V> implements ICache<K,V> {
     }
 
     public void init() {
-        this.expire = new CacheExpire<>(this);
+        this.expire = new CacheExpireRamdon<>(this);
         this.load.load(this);
         // 初始化持久化
         if(this.persist != null) {
