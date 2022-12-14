@@ -15,5 +15,8 @@ public final class CacheEvicts {
     }
     public static <K, V> ICacheEvict<K, V> lru2() {
         return new CacheEvictLRU2<>();
+    }    
+    public static <K, V> ICacheEvict<K, V> lfu() {
+        return new CacheEvictLFU<>();
     }
 }

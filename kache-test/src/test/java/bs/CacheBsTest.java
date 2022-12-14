@@ -1,7 +1,6 @@
 package bs;
 
 import kache.api.ICache;
-import kache.api.ICacheEvict;
 import kache.bs.CacheBs;
 import kache.support.evict.CacheEvicts;
 import kache.support.load.CacheLoadAOF;
@@ -164,7 +163,26 @@ public class CacheBsTest {
         cache.put("4","4");
         cache.put("5","5");//(2,1) (5)
         Assert.assertEquals(3, cache.size());
-        cache.evict()
+        cache.evict();
         System.out.println(cache.keySet());
+    }
+
+    @Test
+    public void lfuTest(){
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
+                .size(3)
+                .evict(CacheEvicts.lfu())
+                .build();
+        cache.put("1","1");
+        cache.put("2","2");
+        cache.put("3","3");
+        cache.get("1");
+        cache.get("2");//1 2 3
+        cache.put("4","4");// 1 2 4
+        System.out.println(cache.keySet());
+        cache.put("5","5");// 1 2 5
+        System.out.println(cache.keySet());
+        Assert.assertEquals(3, cache.size());
+        cache.evict();
     }
 }
